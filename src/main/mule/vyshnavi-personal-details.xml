@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:sftp="http://www.mulesoft.org/schema/mule/sftp" xmlns:jms="http://www.mulesoft.org/schema/mule/jms"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/sftp http://www.mulesoft.org/schema/mule/sftp/current/mule-sftp.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="2f03e6c1-b26b-489d-851d-afd8655e9430" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="vyshnavi-personal-detailsFlow" doc:id="4f88bd51-76c4-4334-aee7-d45840a21838" >
+		<http:listener doc:name="Listener" doc:id="4a6239e9-8fa6-4dab-962f-4253fc1f004e" config-ref="HTTP_Listener_config" path="/vyshnavi"/>
+		<logger level="INFO" doc:name="Logger" doc:id="4dbeffcc-403c-42a0-880f-520016e548b1" />
+		<ee:transform doc:name="Transform Message" doc:id="f1e0ef9a-077c-4d13-b2eb-c5bbd1f6bf03" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	name:'vyshnavi',
+	age:27,
+	email:'vyshnavi@gmail.com'
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="#[payload]" doc:name="Set Variable" doc:id="81196e72-db56-4f51-a8c9-f6b6e05156ee" variableName="primary"/>
+		<ee:transform doc:name="Transform Message" doc:id="94b6a6e8-1281-4d59-ad43-8dab5536e168" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+1/0]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="#[payload]" doc:name="Set Variable" doc:id="3f51d7a6-487b-447f-ac3f-b674f19684ff" variableName="secondary"/>
+		<ee:transform doc:name="Transform Message" doc:id="5dda2b78-98ca-4532-96b6-696201e4dd23" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message":vars.secondary
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="82c7de13-fa9f-4a59-8e4b-65d3e44ffcb7" >
+				<ee:transform doc:name="Transform Message" doc:id="1acf41f3-b2fc-4e9f-ad2a-acaa8ca6503a" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"Message":"Working with on error propagate"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-continue>
+		</error-handler>
+	</flow>
+	<sub-flow name="vyshnavi-personal-detailsSub_Flow" doc:id="aefb6903-d353-4b67-b803-0267a999e6b4" >
+		<ee:transform doc:name="brammiDetails" doc:id="6851dd94-5834-4b84-baeb-7a220c41eec8" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	name:"Brammi",
+	age:34,
+	email:"bachubrammi@gmil.com"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+</mule>
